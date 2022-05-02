@@ -16,7 +16,8 @@ class Peer:
 
         # threadsafe queues to extract data from class in parallel
         self.tcp_queue = Queue()
-        self.udp_queue = Queue()
+        self.udp_receive_queue = Queue()
+        self.udp_send_queue = Queue()
 
     def find(self):
         active_clients = []
@@ -46,7 +47,7 @@ class Peer:
             data, addr = self.udp_listen_socket.recv(self.buffer_size)
             if not data:
                 break
-            self.udp_put_queue(data)
+            self.udp_put_receive_queue(data)
         print(f"connected by {addr}")
         return data
 
@@ -66,14 +67,24 @@ class Peer:
                 self.tcp_put_queue(data)
 
 
-    def udp_put_queue(self, data):
-        self.udp_queue.put(data)
+    def udp_put_receive_queue(self, data):
+        self.udp_receive_queue.put(data)
 
-    def udp_get_queue(self):
-        return self.udp_queue.get()
+    def udp_get_receive_queue(self):
+        return self.udp_receive_queue.get()
+
+    def udp_put_send_queue(self, data):
+        self.udp_send_queue.put(data)
+
+    def udp_get_send_queue(self):
+        return self.udp_send_queue.get()
 
     def tcp_put_queue(self, data):
         self.tcp_queue.put(data)
 
     def tcp_get_queue(self):
         return self.tcp_queue.get()
+
+    def run(self):
+        self.tcp_listen_socket.bind((self.address, self.tcp_port))
+        self.udp_listen_socket.bind((self.address, self.udp_port))
