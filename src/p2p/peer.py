@@ -15,7 +15,6 @@ class Peer:
         self.udp_send_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
         # threadsafe queues to extract data from class in parallel
-        self.tcp_queue = Queue()
         self.udp_receive_queue = Queue()
         self.udp_send_queue = Queue()
 
@@ -51,12 +50,27 @@ class Peer:
         print(f"connected by {addr}")
         return data
 
-    def tcp_send(self, address, data):
+    def tcp_connect(self, address, data, handler):
+        # data in bytes
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as s:
-            s.connect((address, self.tcp_port))
-            s.sendall(data)
+            try:
+                s.connect((address, self.tcp_port))
+            except OSError:
+                print("tcp connection can't be established")
+                raise OSError("possibly server doesn't respond")
 
-    def tcp_receive(self):
+            while True:
+                s.sendall(data)
+                response = s.recv(self.buffer_size)
+                if not response:
+                    print("no more data")
+                    break
+                data = handler(response)
+                if not data:
+                    break
+
+    def tcp_accept(self, handler):
+        # data in bytes
         conn, addr = self.tcp_listen_socket.accept()
         print(f"connected by {addr}")
         with conn:
@@ -64,8 +78,10 @@ class Peer:
                 data = conn.recv(self.buffer_size)
                 if not data:
                     break
-                self.tcp_put_queue(data)
-
+                response = handler(data)
+                if not response:
+                    break
+                conn.sendall(response)
 
     def udp_put_receive_queue(self, data):
         self.udp_receive_queue.put(data)
@@ -78,12 +94,6 @@ class Peer:
 
     def udp_get_send_queue(self):
         return self.udp_send_queue.get()
-
-    def tcp_put_queue(self, data):
-        self.tcp_queue.put(data)
-
-    def tcp_get_queue(self):
-        return self.tcp_queue.get()
 
     def run(self):
         self.tcp_listen_socket.bind((self.address, self.tcp_port))
