@@ -1,11 +1,14 @@
 import json
-from cryptography.cryptography import Crypto
+from src.handling.cryptography.cryptography import Crypto
 
 class Handler:
     def __init__(self, crypto=None):
         if crypto is None:
             crypto = Crypto()
         self.crypto = crypto
+
+    def get_crypto(self):
+        return self.crypto
 
     def tcp_handler(self, data):
         response = {}
@@ -49,7 +52,7 @@ class Handler:
                 response["code"] = "OK"
         elif code == "END":
             print("END")
-            response["code"] = "OK"
+            response["code"] = "END"
         else:
             pass
         print(response)

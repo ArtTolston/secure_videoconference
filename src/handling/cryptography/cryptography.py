@@ -1,10 +1,10 @@
 from queue import Queue
 import json
-from crypto.Cipher import AES, PKCS1_OAEP
-from crypto.Util.Padding import pad, unpad
-from crypto.Hash import SHA256
-from crypto.Random import get_random_bytes
-from crypto.PublicKey import RSA
+from Crypto.Cipher import AES, PKCS1_OAEP
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Hash import SHA256
+from Crypto.Random import get_random_bytes
+from Crypto.PublicKey import RSA
 from pyDH import DiffieHellman
 
 
@@ -73,3 +73,6 @@ class Crypto:
 
     def rsa_decrypt_session_key(self, data):
         return self.RSA_cipher.decrypt(data)
+
+    def rsa_get_pub_key(self):
+        return self.RSA_public_key

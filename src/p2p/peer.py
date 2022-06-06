@@ -1,4 +1,5 @@
 import socket
+import json
 from queue import Queue
 
 class Peer:
@@ -19,15 +20,25 @@ class Peer:
         self.udp_send_queue = Queue()
 
     def find(self):
+        print("find")
         active_clients = []
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as sock:
             for i in range(10):
-                address = f"192.168.1.{i}"
+                #address = f"192.168.1.{i}"
+                address = "127.0.0.1"
+                print(f"looking for address: {address}")
                 try:
                     sock.connect((address, self.tcp_port))
-                    sock.sendall(b"Hello")
-                    data = sock.recv(self.buffer_size)
-                    if not data or data is not b"Hello":
+                    print(f"after connect")
+                    answer = {}
+                    answer["code"] = "HELLO"
+                    sock.sendall(json.dumps(answer).encode())
+                    print(f"after sendall")
+                    response = sock.recv(self.buffer_size)
+                    print(f"after recv")
+                    response = response.decode()
+                    code = response["code"]
+                    if not response or code != "HELLO":
                         print(f"Address {address} is peer but not responds correctly")
                         continue
                     print(f"Address {address} is peer")
