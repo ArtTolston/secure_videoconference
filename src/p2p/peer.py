@@ -1,9 +1,14 @@
 import socket
 import json
+import threading
 from queue import Queue
+from PyQt5.QtCore import QObject, QThread
 
-class Peer:
-    def __init__(self, address="127.0.0.1", tcp_port=10000, udp_port=10001, buffer_size=1024):
+
+class Peer(QThread):
+    def __init__(self, address="192.168.1.10", tcp_port=12345, udp_port=12346, buffer_size=1024, handler=None, parent=None):
+        super(Peer, self).__init__(parent)
+        self.handler = handler
         self.address = address
         self.tcp_port = tcp_port
         self.udp_port = udp_port
@@ -19,13 +24,16 @@ class Peer:
         self.udp_receive_queue = Queue()
         self.udp_send_queue = Queue()
 
+        self.tcp_listen_socket.bind((self.address, self.tcp_port))
+        self.tcp_listen_socket.listen(10)
+
     def find(self):
         print("find")
         active_clients = []
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as sock:
             for i in range(10):
-                #address = f"192.168.1.{i}"
-                address = "127.0.0.1"
+                address = f"192.168.1.{i}"
+                #address = "127.0.0.1"
                 print(f"looking for address: {address}")
                 try:
                     sock.connect((address, self.tcp_port))
@@ -36,7 +44,7 @@ class Peer:
                     print(f"after sendall")
                     response = sock.recv(self.buffer_size)
                     print(f"after recv")
-                    response = response.decode()
+                    response = json.loads(response.decode())
                     code = response["code"]
                     if not response or code != "HELLO":
                         print(f"Address {address} is peer but not responds correctly")
@@ -80,32 +88,27 @@ class Peer:
                 if not data:
                     break
 
-    def tcp_accept(self, handler):
+    def tcp_accept(self, conn, addr, handler):
         # data in bytes
-        conn, addr = self.tcp_listen_socket.accept()
         print(f"connected by {addr}")
         with conn:
             while True:
                 data = conn.recv(self.buffer_size)
+                print(data)
                 if not data:
                     break
-                response = handler(data)
+                response = handler.tcp_handler(data)
                 if not response:
                     break
                 conn.sendall(response)
 
-    def udp_put_receive_queue(self, data):
-        self.udp_receive_queue.put(data)
-
-    def udp_get_receive_queue(self):
-        return self.udp_receive_queue.get()
-
-    def udp_put_send_queue(self, data):
-        self.udp_send_queue.put(data)
-
-    def udp_get_send_queue(self):
-        return self.udp_send_queue.get()
 
     def run(self):
-        self.tcp_listen_socket.bind((self.address, self.tcp_port))
-        self.udp_listen_socket.bind((self.address, self.udp_port))
+        self.is_active = True
+        while True:
+            conn, addr = self.tcp_listen_socket.accept()
+            th = threading.Thread(target=self.tcp_accept,
+                                  args=(conn, addr, self.handler))
+            th.start()
+            if not self.is_active:
+                break

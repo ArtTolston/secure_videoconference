@@ -9,6 +9,7 @@
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QThread
 import pickle
 
 # manual changes
@@ -60,7 +61,6 @@ class Ui_MainWindow(object):
         # manual changes
 
         self.handler = Handler()
-        self.peer = Peer()
 
         self.camera = cv2.VideoCapture(0)
         self.fps = 30
@@ -74,6 +74,10 @@ class Ui_MainWindow(object):
         self.updateButton.clicked.connect(self.update)
         self.clientsListWidget.itemClicked.connect(self.save_address)
         self.connectButton.clicked.connect(self.connect)
+
+        # Create a QThread object
+        self.peer = Peer(handler=self.handler)
+        self.peer.start()
 
     def setup_camera(self, fps):
         self.camera.set(3, self.video_size.width())
@@ -106,7 +110,7 @@ class Ui_MainWindow(object):
             return False
 
         bframe = pickle.dumps(frame)
-        self.handler.get_crypto().
+        self.handler.get_crypto()
         self.peer.udp_put_send_queue(bframe)
 
     def update(self):
@@ -141,7 +145,8 @@ class Ui_MainWindow(object):
         self.is_video_started = True
 
 
-
+    def finish(self):
+        self.peer.is_active = False
 
 
     def save_address(self, address):

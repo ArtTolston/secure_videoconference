@@ -12,7 +12,8 @@ class Handler:
 
     def tcp_handler(self, data):
         response = {}
-        data = data.decode()
+        data = json.loads(data.decode())
+        print(data)
         code = data["code"]
         if code == "HELLO":
             print("HELLO")
