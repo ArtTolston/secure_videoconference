@@ -33,10 +33,11 @@ class Handler:
                 print("START1 PKI")
                 # if exists, doesn't change
                 self.crypto.gen_session_key()
-                encrypted_key = self.crypto.rsa_encrypt_session_key(data["pub_key"])
+                encrypted_key = self.crypto.rsa_encrypt_session_key(data["pub_key"].encode())
                 response["code"] = "START2"
                 response["algorithm"] = "PKI"
                 response["encrypted_key"] = encrypted_key
+                print(f"response: {response}")
             else:
                 pass
         elif code == "START2":

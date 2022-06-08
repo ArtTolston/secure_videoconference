@@ -13,12 +13,9 @@ class Peer(QThread):
         self.tcp_port = tcp_port
         self.udp_port = udp_port
         self.buffer_size = buffer_size
+
         self.tcp_listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.tcp_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        self.udp_listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.udp_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.udp_send_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
         # threadsafe queues to extract data from class in parallel
         self.udp_receive_queue = Queue()
@@ -31,7 +28,7 @@ class Peer(QThread):
         print("find")
         active_clients = []
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as sock:
-            for i in range(10):
+            for i in range(9, 1, -1):
                 address = f"192.168.1.{i}"
                 #address = "127.0.0.1"
                 print(f"looking for address: {address}")
@@ -55,9 +52,7 @@ class Peer(QThread):
                     print(f"Address {address} is not active")
         return active_clients
 
-    def udp_send(self, address, data):
-        # data should be in bytes b''
-        self.udp_send_socket.sendto(data, (address, self.udp_port))
+
 
     def udp_receive(self):
         # receive data in bytes

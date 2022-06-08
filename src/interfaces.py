@@ -16,7 +16,8 @@ import pickle
 import cv2
 import qimage2ndarray
 
-from src.p2p.peer import Peer
+from src.p2p.tcp_peer import Peer
+from src.p2p.udp_peer import UDP_Peer
 from src.handling.handler import  Handler
 import json
 
@@ -79,6 +80,9 @@ class Ui_MainWindow(object):
         self.peer = Peer(handler=self.handler)
         self.peer.start()
 
+        self.udp_peer = UDP_Peer(handler=self.handler)
+
+
     def setup_camera(self, fps):
         self.camera.set(3, self.video_size.width())
         self.camera.set(4, self.video_size.height())
@@ -88,16 +92,13 @@ class Ui_MainWindow(object):
         self.timer.start(int(1000 / self.fps))
 
     def display_video_stream(self):
-        ret, frame = self.camera.read()
+        if not self.is_video_started:
+            return
 
-        if not ret:
-            return False
-
+        frame = self.udp_peer.udp_receive_queue.get()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
         image = qimage2ndarray.array2qimage(frame)
-
-        # frame = self.peer.udp_get_receive_queue()
 
         self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
@@ -110,8 +111,7 @@ class Ui_MainWindow(object):
             return False
 
         bframe = pickle.dumps(frame)
-        self.handler.get_crypto()
-        self.peer.udp_put_send_queue(bframe)
+        self.udp_peer.udp_send_queue.put(bframe)
 
     def update(self):
         active_clients_addresses = self.peer.find()
@@ -131,17 +131,20 @@ class Ui_MainWindow(object):
             request["pub_key"] = pub_key
         elif cipher == "Public key exchange":
             request["algorithm"] = "PKI"
-            pub_key = self.handler.get_crypto().rsa_get_pub_key()
+            pub_key = self.handler.get_crypto().rsa_get_pub_key().decode()
             request["pub_key"] = pub_key
         else:
             pass
-
+        print(request)
+        print(self.choosed_address)
         try:
             self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler.tcp_handler)
         except OSError:
             print("tcp connection error")
             return
 
+        print("start sending udp")
+        self.udp_peer.start()
         self.is_video_started = True
 
 
@@ -151,6 +154,7 @@ class Ui_MainWindow(object):
 
     def save_address(self, address):
         self.choosed_address = address.text()
+        self.udp_peer.choosed_address = self.choosed_address
 
 
     def retranslateUi(self, MainWindow):
