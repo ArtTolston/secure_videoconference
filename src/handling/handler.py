@@ -1,5 +1,7 @@
 import json
 from src.handling.cryptography.cryptography import Crypto
+from base64 import b64encode, b64decode
+
 
 class Handler:
     def __init__(self, crypto=None):
@@ -36,7 +38,7 @@ class Handler:
                 encrypted_key = self.crypto.rsa_encrypt_session_key(data["pub_key"].encode())
                 response["code"] = "START2"
                 response["algorithm"] = "PKI"
-                response["encrypted_key"] = encrypted_key.decode()
+                response["encrypted_key"] = b64encode(encrypted_key).decode()
                 print(f"response: {response}")
             else:
                 pass
@@ -49,7 +51,7 @@ class Handler:
                 response["code"] = "OK"
             elif algorithm == "PKI":
                 print("START2 PKI")
-                session_key = self.crypto.rsa_decrypt_session_key(data["encrypted_key"].encode())
+                session_key = self.crypto.rsa_decrypt_session_key(b64decode(data["encrypted_key"].encode()))
                 self.crypto.set_session_key(session_key)
                 response["code"] = "OK"
         elif code == "END":

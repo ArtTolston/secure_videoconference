@@ -19,11 +19,8 @@ class Crypto:
         self.DH_pub_key = None
         # Public-key cryptography
         key = RSA.generate(2048)
-        print(key)
         self.RSA_private_key = key.export_key()
-        print(self.RSA_private_key)
         self.RSA_public_key = key.public_key().export_key()
-        print(key.public_key())
         self.RSA_cipher = PKCS1_OAEP.new(key)
 
     def aes_encrypt(self, in_data_f, out_data_f):
