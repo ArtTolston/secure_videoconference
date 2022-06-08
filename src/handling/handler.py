@@ -3,7 +3,7 @@ from src.handling.cryptography.cryptography import Crypto
 from base64 import b64encode, b64decode
 
 
-class Handler(QObject):
+class Handler():
     def __init__(self, crypto=None):
         if crypto is None:
             crypto = Crypto()
@@ -57,7 +57,8 @@ class Handler(QObject):
                 response["code"] = "OK"
         elif code == "OK":
             print("OK")
-            self.is_video_started = True
+            with open("ok.txt", "w") as f:
+                f.write("ok")
             return
         else:
             pass

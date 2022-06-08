@@ -103,7 +103,10 @@ class Ui_MainWindow(object):
         self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def send_video_stream(self):
-        if self.peer.handler.is_video_started == True:
+        sign = ""
+        with open("handling/ok.txt", "r") as f:
+            sign = f.read()
+        if sign == "ok":
             self.is_video_started = True
 
         if self.is_video_started is False:
