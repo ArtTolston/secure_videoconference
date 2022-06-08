@@ -3,11 +3,12 @@ from src.handling.cryptography.cryptography import Crypto
 from base64 import b64encode, b64decode
 
 
-class Handler:
+class Handler(QObject):
     def __init__(self, crypto=None):
         if crypto is None:
             crypto = Crypto()
         self.crypto = crypto
+        self.is_video_started = False
 
     def get_crypto(self):
         return self.crypto
@@ -56,6 +57,7 @@ class Handler:
                 response["code"] = "OK"
         elif code == "OK":
             print("OK")
+            self.is_video_started = True
             return
         else:
             pass

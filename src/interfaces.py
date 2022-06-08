@@ -103,6 +103,9 @@ class Ui_MainWindow(object):
         self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def send_video_stream(self):
+        if self.peer.handler.is_video_started == True:
+            self.is_video_started = True
+
         if self.is_video_started is False:
             return
         ret, frame = self.camera.read()
@@ -147,9 +150,6 @@ class Ui_MainWindow(object):
         self.udp_peer.start()
         self.is_video_started = True
 
-
-    def finish(self):
-        self.peer.is_active = False
 
 
     def save_address(self, address):
