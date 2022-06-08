@@ -3,6 +3,8 @@ import json
 import threading
 from queue import Queue
 from PyQt5.QtCore import QObject, QThread
+import sys
+import zlib
 
 class UDP_Peer(QThread):
     def __init__(self, address="192.168.1.10", udp_port=12346, buffer_size=1024, handler=None, parent=None):
@@ -25,16 +27,38 @@ class UDP_Peer(QThread):
 
     def run(self):
         # data should be in bytes b''
+        i = 0
+        image = b''
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as udp_sock:
             while True:
-                data = self.udp_send_queue.get()
-                udp_sock.sendto(data, (self.choosed_address, self.udp_port))
+                if i == 0:
+                    data = self.udp_send_queue.get()
+                    zdata = zlib.compress(data, zlib.Z_BEST_SPEED)
+                    print(sys.getsizeof(zlib.compress(data, zlib.Z_BEST_SPEED)))
+
+                if i + 1000 > len(zdata):
+                    send_data = zdata[i:]
+                    i = 0
+                else:
+                    print(i)
+                    send_data = zdata[i: i + 1000]
+                    i += 1000
+                udp_sock.sendto(send_data, (self.choosed_address, self.udp_port))
+
                 print("between send and recv")
-                data = udp_sock.recvfrom(self.buffer_size)
-                if not data:
+
+                recv_data = udp_sock.recvfrom(self.buffer_size)
+                if not recv_data:
+                    print("no recv_data")
                     break
-                print(data)
-                self.udp_receive_queue.put(data)
+
+                image += recv_data
+                if len(recv_data) < 1000:
+                    image = zlib.decompress(image, zlib.Z_BEST_SPEED)
+                    self.udp_receive_queue.put(image)
+                    image = b''
+
+
 
 
     def udp_receive(self):
