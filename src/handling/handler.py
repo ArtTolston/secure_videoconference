@@ -36,7 +36,7 @@ class Handler:
                 encrypted_key = self.crypto.rsa_encrypt_session_key(data["pub_key"].encode())
                 response["code"] = "START2"
                 response["algorithm"] = "PKI"
-                response["encrypted_key"] = encrypted_key
+                response["encrypted_key"] = encrypted_key.decode()
                 print(f"response: {response}")
             else:
                 pass
@@ -49,7 +49,7 @@ class Handler:
                 response["code"] = "OK"
             elif algorithm == "PKI":
                 print("START2 PKI")
-                session_key = self.crypto.rsa_decrypt_session_key(data["encrypted_key"])
+                session_key = self.crypto.rsa_decrypt_session_key(data["encrypted_key"].encode())
                 self.crypto.set_session_key(session_key)
                 response["code"] = "OK"
         elif code == "END":

@@ -9,7 +9,7 @@ from pyDH import DiffieHellman
 
 
 class Crypto:
-    def __init__(self, session_key=None):
+    def __init__(self, session_key=get_random_bytes(16)):
         # AES
         self.AES = "AES"
         self.session_key = session_key
@@ -19,9 +19,12 @@ class Crypto:
         self.DH_pub_key = None
         # Public-key cryptography
         key = RSA.generate(2048)
+        print(key)
         self.RSA_private_key = key.export_key()
+        print(self.RSA_private_key)
         self.RSA_public_key = key.public_key().export_key()
-        self.RSA_cipher = PKCS1_OAEP.new(self.RSA_private_key)
+        print(key.public_key())
+        self.RSA_cipher = PKCS1_OAEP.new(key)
 
     def aes_encrypt(self, in_data_f, out_data_f):
         # data should be in bytes
@@ -68,10 +71,12 @@ class Crypto:
             self.session_key = get_random_bytes(16)
 
     def rsa_encrypt_session_key(self, rsa_pub_key):
+        rsa_pub_key = RSA.import_key(rsa_pub_key)
         new_cipher = PKCS1_OAEP.new(rsa_pub_key)
         return new_cipher.encrypt(self.session_key)
 
     def rsa_decrypt_session_key(self, data):
+        print(data)
         return self.RSA_cipher.decrypt(data)
 
     def rsa_get_pub_key(self):
