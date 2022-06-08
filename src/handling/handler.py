@@ -54,9 +54,9 @@ class Handler:
                 session_key = self.crypto.rsa_decrypt_session_key(b64decode(data["encrypted_key"].encode()))
                 self.crypto.set_session_key(session_key)
                 response["code"] = "OK"
-        elif code == "END":
-            print("END")
-            response["code"] = "END"
+        elif code == "OK":
+            print("OK")
+            return
         else:
             pass
         print(response)
