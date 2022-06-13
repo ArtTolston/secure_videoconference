@@ -24,49 +24,14 @@ class UDP_Peer(QThread):
         self.udp_receive_queue = Queue()
         self.udp_send_queue = Queue()
 
-    def udp_send(self):
+    def udp_start(self):
         # data should be in bytes b''
-        print("inside udp_send")
-        i = 0
-        image = b''
+        print("inside udp_start")
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as udp_sock:
-            while True:
-                print("in while true")
-                if i == 0:
-                    print("before data")
-                    data = self.udp_send_queue.get()
-                    print("after getting data")
-                    if not data:
-                        print("no data to send")
-                        continue
-                    zdata = zlib.compress(data, zlib.Z_BEST_SPEED)
-                    print(sys.getsizeof(zlib.compress(data, zlib.Z_BEST_SPEED)))
+            udp_sock.sendto(b'START', (self.choosed_address, self.udp_port))
 
-                if i + 1000 > len(zdata):
-                    send_data = zdata[i:]
-                    i = 0
-                else:
-                    print(i)
-                    send_data = zdata[i: i + 1000]
-                    i += 1000
-                print(f"choosed address: {self.choosed_address}, udp_port: {self.udp_port}")
-                udp_sock.sendto(send_data, (self.choosed_address, self.udp_port))
 
-                print("between send and recv")
-
-                recv_data, address = udp_sock.recvfrom(self.buffer_size)
-                if not recv_data:
-                    print("no recv_data")
-                    continue
-
-                image += recv_data
-                if len(recv_data) < 1000:
-                    image = zlib.decompress(image, zlib.Z_BEST_SPEED)
-                    self.udp_receive_queue.put(image)
-                    image = b''
-
-    def udp_receive(self):
-        # receive data in bytes
+    def run(self):
         i = 0
         image = b''
         while True:
@@ -75,32 +40,27 @@ class UDP_Peer(QThread):
             if not recv_data:
                 print("no recv_data")
                 break
-            self.choosed_address = addr[0]
-            print(f"sent by address: {addr[0]} from port: {addr[1]}")
-            image += recv_data
-            if len(recv_data) < 1000:
-                image = zlib.decompress(image, zlib.Z_BEST_SPEED)
-                self.udp_receive_queue.put(image)
-                image = b''
+            if recv_data == b'START':
+                self.choosed_address = addr[0]
+                print(f"sent by address: {addr[0]} from port: {addr[1]}")
+            else:
+                image += recv_data
+                if len(recv_data) < self.buffer_size:
+                    image = zlib.decompress(image, zlib.Z_BEST_SPEED)
+                    self.udp_receive_queue.put(image)
+                    image = b''
 
             if i == 0:
                 data = self.udp_send_queue.get()
                 zdata = zlib.compress(data, zlib.Z_BEST_SPEED)
                 print(sys.getsizeof(zlib.compress(data, zlib.Z_BEST_SPEED)))
 
-            if i + 1000 > len(zdata):
+            if i + self.buffer_size > len(zdata):
                 send_data = zdata[i:]
                 i = 0
             else:
                 print(i)
-                send_data = zdata[i: i + 1000]
-                i += 1000
+                send_data = zdata[i: i + self.buffer_size]
+                i += self.buffer_size
             print("udp server send")
             self.udp_listen_socket.sendto(send_data, (self.choosed_address, self.udp_port))
-
-    def run(self, switch="receive"):
-        if switch == "receive":
-            self.udp_receive()
-        else:
-            self.udp_send()
-
