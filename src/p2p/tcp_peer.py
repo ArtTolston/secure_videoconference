@@ -5,6 +5,7 @@ from queue import Queue
 from PyQt5.QtCore import QObject, QThread
 
 
+
 class Peer(QThread):
     def __init__(self, address="192.168.1.10", tcp_port=12345, udp_port=12346, buffer_size=1024, handler=None, parent=None):
         super(Peer, self).__init__(parent)
@@ -13,13 +14,10 @@ class Peer(QThread):
         self.tcp_port = tcp_port
         self.udp_port = udp_port
         self.buffer_size = buffer_size
+        self.is_video_started = False
 
         self.tcp_listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.tcp_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        # threadsafe queues to extract data from class in parallel
-        self.udp_receive_queue = Queue()
-        self.udp_send_queue = Queue()
 
         self.tcp_listen_socket.bind((self.address, self.tcp_port))
         self.tcp_listen_socket.listen(10)
@@ -52,18 +50,6 @@ class Peer(QThread):
                     print(f"Address {address} is not active")
         return active_clients
 
-
-
-    def udp_receive(self):
-        # receive data in bytes
-        while True:
-            data, addr = self.udp_listen_socket.recv(self.buffer_size)
-            if not data:
-                break
-            self.udp_put_receive_queue(data)
-        print(f"connected by {addr}")
-        return data
-
     def tcp_connect(self, address, data, handler):
         # data in bytes
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as s:
@@ -79,9 +65,10 @@ class Peer(QThread):
                 if not response:
                     print("no more data")
                     break
-                data = handler(response)
+                data = handler.tcp_handler(response)
                 if not data:
                     break
+        self.is_video_started = self.handler.is_video_started
 
     def tcp_accept(self, conn, addr, handler):
         # data in bytes
@@ -96,7 +83,7 @@ class Peer(QThread):
                 if not response:
                     break
                 conn.sendall(response)
-
+        self.is_video_started = self.handler.is_video_started
 
     def run(self):
         self.is_active = True

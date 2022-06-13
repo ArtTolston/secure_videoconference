@@ -92,6 +92,7 @@ class Ui_MainWindow(object):
 
         self.timer.timeout.connect(self.display_video_stream)
         self.timer.timeout.connect(self.send_video_stream)
+        self.timer.timeout.connect(self.check_is_video_started)
         self.timer.start(int(1000 / self.fps))
 
     def display_video_stream(self):
@@ -123,6 +124,10 @@ class Ui_MainWindow(object):
 
         bframe = pickle.dumps(frame)
         self.udp_peer.udp_send_queue.put(bframe)
+
+    def check_is_video_started(self):
+        if self.peer.is_video_started:
+            self.is_video_started = True
 
     def update(self):
         active_clients_addresses = self.peer.find()

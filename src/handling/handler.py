@@ -57,8 +57,7 @@ class Handler():
                 response["code"] = "OK"
         elif code == "OK":
             print("OK")
-            with open("ok.txt", "w") as f:
-                f.write("ok")
+            self.is_video_started = True
             return
         else:
             pass
