@@ -70,8 +70,10 @@ class UDP_Peer(QThread):
         i = 0
         image = b''
         while True:
+            print(f"start udp server listen on\n [address: {self.address}, port: {self.udp_port}]")
             recv_data, addr = self.udp_listen_socket.recvfrom(self.buffer_size)
             if not recv_data:
+                print("no recv_data")
                 break
             self.choosed_address = addr[0]
             image += recv_data
@@ -92,6 +94,7 @@ class UDP_Peer(QThread):
                 print(i)
                 send_data = zdata[i: i + 1000]
                 i += 1000
+            print("udp server send")
             self.udp_listen_socket.sendto(send_data, (self.choosed_address, self.udp_port))
 
     def run(self, switch="receive"):

@@ -108,7 +108,6 @@ class Ui_MainWindow(object):
 
     def send_video_stream(self):
         if self.is_video_started is False:
-            print("is started false")
             return
         ret, frame = self.camera.read()
 
