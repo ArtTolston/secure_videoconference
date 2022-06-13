@@ -97,7 +97,8 @@ class Ui_MainWindow(object):
     def display_video_stream(self):
         if not self.is_video_started:
             return
-
+        if self.udp_peer.udp_receive_queue.empty():
+            return
         frame = self.udp_peer.udp_receive_queue.get()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -107,10 +108,12 @@ class Ui_MainWindow(object):
 
     def send_video_stream(self):
         if self.is_video_started is False:
+            print("is started false")
             return
         ret, frame = self.camera.read()
 
         if not ret:
+            print("bad ret")
             return False
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -152,16 +155,14 @@ class Ui_MainWindow(object):
             return
 
         print("start sending udp")
+        self.is_video_started = True
         th = Thread(target=self.udp_peer.run, args=("send",))
         th.start()
-        self.is_video_started = True
-
-
+        #self.udp_peer.udp_send()
 
     def save_address(self, address):
         self.choosed_address = address.text()
         self.udp_peer.choosed_address = self.choosed_address
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
