@@ -100,7 +100,8 @@ class Ui_MainWindow(object):
             return
         if self.udp_peer.udp_receive_queue.empty():
             return
-        frame = self.udp_peer.udp_receive_queue.get()
+        bframe = self.udp_peer.udp_receive_queue.get()
+        frame = pickle.loads(bframe)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
         image = qimage2ndarray.array2qimage(frame)
@@ -120,7 +121,7 @@ class Ui_MainWindow(object):
         frame = cv2.flip(frame, 1)
         image = qimage2ndarray.array2qimage(frame)
 
-        self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
+        #self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
         bframe = pickle.dumps(frame)
         self.udp_peer.udp_send_queue.put(bframe)
