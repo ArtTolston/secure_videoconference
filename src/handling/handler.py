@@ -40,7 +40,6 @@ class Handler():
                 response["code"] = "START2"
                 response["algorithm"] = "PKI"
                 response["encrypted_key"] = b64encode(encrypted_key).decode()
-                print(f"response: {response}")
             else:
                 pass
         elif code == "START2":

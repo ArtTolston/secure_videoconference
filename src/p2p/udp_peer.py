@@ -34,8 +34,8 @@ class UDP_Peer(QThread):
     def run(self):
         i = 0
         image = b''
+        print(f"start udp server listen on\n [address: {self.address}, port: {self.udp_port}]")
         while True:
-            print(f"start udp server listen on\n [address: {self.address}, port: {self.udp_port}]")
             recv_data, addr = self.udp_listen_socket.recvfrom(self.buffer_size)
             if not recv_data:
                 print("no recv_data")
@@ -45,6 +45,8 @@ class UDP_Peer(QThread):
                 print(f"sent by address: {addr[0]} from port: {addr[1]}")
             else:
                 image += recv_data
+                print(f"recv_data size: {len(recv_data)}")
+                print(f"image size: {len(image)}")
                 if len(recv_data) < self.buffer_size:
                     image = zlib.decompress(image, zlib.Z_BEST_SPEED)
                     self.udp_receive_queue.put(image)
@@ -54,6 +56,7 @@ class UDP_Peer(QThread):
                 data = self.udp_send_queue.get()
                 zdata = zlib.compress(data, zlib.Z_BEST_SPEED)
                 print(sys.getsizeof(zlib.compress(data, zlib.Z_BEST_SPEED)))
+                print(f"zdata size: {len(zdata)}")
 
             if i + self.buffer_size > len(zdata):
                 send_data = zdata[i:]
