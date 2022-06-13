@@ -48,14 +48,13 @@ class UDP_Peer(QThread):
                 print(f"recv_data size: {len(recv_data)}")
                 print(f"image size: {len(image)}")
                 if len(recv_data) < self.buffer_size:
-                    image = zlib.decompress(image, zlib.Z_BEST_SPEED)
+                    image = zlib.decompress(image)
                     self.udp_receive_queue.put(image)
                     image = b''
 
             if i == 0:
                 data = self.udp_send_queue.get()
-                zdata = zlib.compress(data, zlib.Z_BEST_SPEED)
-                print(sys.getsizeof(zlib.compress(data, zlib.Z_BEST_SPEED)))
+                zdata = zlib.compress(data)
                 print(f"zdata size: {len(zdata)}")
 
             if i + self.buffer_size > len(zdata):
