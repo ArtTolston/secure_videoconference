@@ -153,7 +153,7 @@ class Ui_MainWindow(object):
         print(request)
         print(self.choosed_address)
         try:
-            self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler.tcp_handler)
+            self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler)
         except OSError:
             print("tcp connection error")
             return

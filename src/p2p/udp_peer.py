@@ -76,6 +76,7 @@ class UDP_Peer(QThread):
                 print("no recv_data")
                 break
             self.choosed_address = addr[0]
+            print(f"sent by address: {addr[0]} from port: {addr[1]}")
             image += recv_data
             if len(recv_data) < 1000:
                 image = zlib.decompress(image, zlib.Z_BEST_SPEED)
