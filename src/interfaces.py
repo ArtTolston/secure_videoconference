@@ -158,7 +158,6 @@ class Ui_MainWindow(object):
         self.is_video_started = True
         th = Thread(target=self.udp_peer.run, args=("send",))
         th.start()
-        #self.udp_peer.udp_send()
 
     def save_address(self, address):
         self.choosed_address = address.text()
