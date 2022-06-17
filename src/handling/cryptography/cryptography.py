@@ -6,6 +6,7 @@ from Crypto.Hash import SHA256
 from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import RSA
 from pyDH import DiffieHellman
+from base64 import b64decode, b64encode
 
 
 class Crypto:
@@ -27,6 +28,7 @@ class Crypto:
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
         encrypted_bytes = aes.encrypt(pad(data, AES.block_size))
+        encrypted_bytes = b64encode(encrypted_bytes)
         iv = aes.iv
         data_to_send = json.dumps({"iv": iv, "encrypted_bytes": encrypted_bytes}).encode()
         return data_to_send
@@ -37,6 +39,7 @@ class Crypto:
         data = data.decode()
         aes.iv = data["iv"]
         encrypted_bytes = data["encrypted_bytes"]
+        encrypted_bytes = b64decode(encrypted_bytes)
         data_to_show = unpad(aes.decrypt(encrypted_bytes), AES.block_size)
         return data_to_show
 

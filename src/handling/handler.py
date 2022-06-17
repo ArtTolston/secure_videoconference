@@ -9,6 +9,7 @@ class Handler():
             crypto = Crypto()
         self.crypto = crypto
         self.is_video_started = False
+        self.cipher = ""
 
     def get_crypto(self):
         return self.crypto
@@ -48,11 +49,13 @@ class Handler():
                 print("START2 DH")
                 self.crypto.gen_dh_shared_key(data["pub_key"])
                 self.crypto.gen_session_key_from_shared_key()
+                self.cipher = "Diffie-Helman"
                 response["code"] = "OK"
             elif algorithm == "PKI":
                 print("START2 PKI")
                 session_key = self.crypto.rsa_decrypt_session_key(b64decode(data["encrypted_key"].encode()))
                 self.crypto.set_session_key(session_key)
+                self.cipher = "Public key exchange"
                 response["code"] = "OK"
         elif code == "OK":
             print("OK")

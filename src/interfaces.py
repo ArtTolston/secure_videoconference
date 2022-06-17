@@ -72,6 +72,7 @@ class Ui_MainWindow(object):
 
         self.choosed_address = None
         self.is_video_started = False
+        self.cipher = "Public key exchange"
 
         self.updateButton.clicked.connect(self.update)
         self.clientsListWidget.itemClicked.connect(self.save_address)
@@ -137,6 +138,7 @@ class Ui_MainWindow(object):
     def check_is_video_started(self):
         if self.peer.is_video_started:
             self.is_video_started = True
+            self.cipher = self.handler.cipher
 
     def update(self):
         active_clients_addresses = self.peer.find()
