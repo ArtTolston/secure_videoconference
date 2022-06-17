@@ -101,6 +101,10 @@ class Ui_MainWindow(object):
         if self.udp_peer.udp_receive_queue.empty():
             return
         bframe = self.udp_peer.udp_receive_queue.get()
+        if self.cipher == "Public key exchange":
+            bframe = self.handler.get_crypto().aes_decrypt(bframe)
+        else:
+            pass
         frame = pickle.loads(bframe)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -124,6 +128,10 @@ class Ui_MainWindow(object):
         #self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
         bframe = pickle.dumps(frame)
+        if self.cipher == "Public key exchange":
+            bframe = self.handler.get_crypto().aes_encrypt(bframe)
+        else:
+            pass
         self.udp_peer.udp_send_queue.put(bframe)
 
     def check_is_video_started(self):
@@ -151,6 +159,7 @@ class Ui_MainWindow(object):
             request["pub_key"] = pub_key
         else:
             pass
+        self.cipher = cipher
         print(request)
         print(self.choosed_address)
         try:

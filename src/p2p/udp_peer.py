@@ -8,7 +8,7 @@ import zlib
 
 
 class UDP_Peer(QThread):
-    def __init__(self, address="192.168.1.10", udp_port=12346, buffer_size=1024, handler=None, parent=None):
+    def __init__(self, address="192.168.1.10", udp_port=12346, buffer_size=8192, handler=None, parent=None):
         super(UDP_Peer, self).__init__(parent)
         self.handler = handler
         self.address = address

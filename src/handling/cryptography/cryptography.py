@@ -23,30 +23,22 @@ class Crypto:
         self.RSA_public_key = key.public_key().export_key()
         self.RSA_cipher = PKCS1_OAEP.new(key)
 
-    def aes_encrypt(self, in_data_f, out_data_f):
+    def aes_encrypt(self, data):
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
-        while True:
-            data = in_data_f()
-            if not data:
-                break
-            encrypted_bytes = aes.encrypt(pad(data, AES.block_size))
-            iv = aes.iv
-            data_to_send = json.dumps({"iv": iv, "encrypted_bytes": encrypted_bytes}).encode()
-            out_data_f(data_to_send)
+        encrypted_bytes = aes.encrypt(pad(data, AES.block_size))
+        iv = aes.iv
+        data_to_send = json.dumps({"iv": iv, "encrypted_bytes": encrypted_bytes}).encode()
+        return data_to_send
 
-    def aes_decrypt(self, in_data_f, out_data_f):
+    def aes_decrypt(self, data):
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
-        while True:
-            data = in_data_f()
-            if not data:
-                break
-            data = data.decode()
-            aes.iv = data["iv"]
-            encrypted_bytes = data["encrypted_bytes"]
-            data_to_send = unpad(aes.decrypt(encrypted_bytes), AES.block_size)
-            out_data_f(data_to_send)
+        data = data.decode()
+        aes.iv = data["iv"]
+        encrypted_bytes = data["encrypted_bytes"]
+        data_to_show = unpad(aes.decrypt(encrypted_bytes), AES.block_size)
+        return data_to_show
 
     def gen_dh_shared_key(self, pub_key):
         self.DH_shared_key = self.DH.gen_shared_key(pub_key)
