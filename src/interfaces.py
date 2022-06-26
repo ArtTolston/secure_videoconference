@@ -131,6 +131,7 @@ class Ui_MainWindow(object):
 
         bframe = pickle.dumps(frame)
         if self.cipher == "Public key exchange":
+            print(self.handler.get_crypto().session_key)
             bframe = self.handler.get_crypto().aes_encrypt(bframe)
         else:
             pass
@@ -166,7 +167,7 @@ class Ui_MainWindow(object):
         print(request)
         print(self.choosed_address)
         try:
-            self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler)
+            self.handler = self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler)
         except OSError:
             print("tcp connection error")
             return

@@ -84,6 +84,7 @@ class Peer(QThread):
                     break
                 conn.sendall(response)
         self.is_video_started = self.handler.is_video_started
+        return handler
 
     def run(self):
         self.is_active = True
