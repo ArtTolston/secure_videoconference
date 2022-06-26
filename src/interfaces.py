@@ -138,7 +138,7 @@ class Ui_MainWindow(object):
     def check_is_video_started(self):
         if self.peer.is_video_started:
             self.is_video_started = True
-            self.cipher = self.handler.cipher
+            self.cipher = "Public key exchange"
 
     def update(self):
         active_clients_addresses = self.peer.find()
