@@ -69,6 +69,7 @@ class Peer(QThread):
                 if not data:
                     break
         self.is_video_started = self.handler.is_video_started
+        return handler
 
     def tcp_accept(self, conn, addr, handler):
         # data in bytes
@@ -84,7 +85,6 @@ class Peer(QThread):
                     break
                 conn.sendall(response)
         self.is_video_started = self.handler.is_video_started
-        return handler
 
     def run(self):
         self.is_active = True
