@@ -105,12 +105,12 @@ class Ui_MainWindow(object):
         if self.udp_peer.udp_receive_queue.empty():
             return
         bframe = self.udp_peer.udp_receive_queue.get()
-        print(f'bframe md5 after receiving(encrypted): {base64.b64decode(hashlib.md5(bframe).digest()).decode()}')
+        print(f'bframe md5 after receiving(encrypted): {base64.b64encode(hashlib.md5(bframe).digest()).decode()}')
         if self.cipher == "Public key exchange":
             bframe = self.handler.get_crypto().aes_decrypt(bframe)
         else:
             pass
-        print(f'bframe md5 after decrypting(only pickling): {base64.b64decode(hashlib.md5(bframe).digest()).decode()}')
+        print(f'bframe md5 after decrypting(only pickling): {base64.b64encode(hashlib.md5(bframe).digest()).decode()}')
         frame = pickle.loads(bframe)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
@@ -134,13 +134,13 @@ class Ui_MainWindow(object):
         #self.videoLabel.setPixmap(QtGui.QPixmap.fromImage(image))
 
         bframe = pickle.dumps(frame)
-        print(f'bframe md5 after pickling: {base64.b64decode(hashlib.md5(bframe).digest()).decode()}')
+        print(f'bframe md5 after pickling: {base64.b64encode(hashlib.md5(bframe).digest()).decode()}')
         if self.cipher == "Public key exchange":
             print(self.handler.get_crypto().session_key)
             bframe = self.handler.get_crypto().aes_encrypt(bframe)
         else:
             pass
-        print(f'bframe md5 after encrypting: {base64.b64decode(hashlib.md5(bframe).digest()).decode()}')
+        print(f'bframe md5 after encrypting: {base64.b64encode(hashlib.md5(bframe).digest()).decode()}')
         self.udp_peer.udp_send_queue.put(bframe)
 
     def check_is_video_started(self):
