@@ -85,6 +85,7 @@ class Ui_MainWindow(object):
         self.udp_peer = UDP_Peer(handler=self.handler)
         self.udp_peer.start()
         self.is_video_started = False
+        self.cipher = "Public key exchange"
 
 
     def setup_camera(self, fps):
