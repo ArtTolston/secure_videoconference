@@ -14,6 +14,7 @@ class Crypto:
         # AES
         self.AES = "AES"
         self.session_key = session_key
+        print(session_key)
         # Diffie-Hellman
         self.DH = DiffieHellman()
         self.DH_shared_key = None
@@ -28,9 +29,9 @@ class Crypto:
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
         encrypted_bytes = aes.encrypt(pad(data, AES.block_size))
-        encrypted_bytes = b64encode(encrypted_bytes)
+        encrypted_bytes = b64encode(encrypted_bytes).decode()
         iv = aes.iv
-        iv = b64encode(iv)
+        iv = b64encode(iv).decode()
         data_to_send = json.dumps({"iv": iv, "encrypted_bytes": encrypted_bytes}).encode()
         return data_to_send
 
@@ -39,9 +40,9 @@ class Crypto:
         aes = AES.new(self.session_key, AES.MODE_CBC)
         data = data.decode()
         iv = data["iv"]
-        aes.iv = b64decode(iv)
+        aes.iv = b64decode(iv.encode())
         encrypted_bytes = data["encrypted_bytes"]
-        encrypted_bytes = b64decode(encrypted_bytes)
+        encrypted_bytes = b64decode(encrypted_bytes.encode())
         data_to_show = unpad(aes.decrypt(encrypted_bytes), AES.block_size)
         return data_to_show
 
@@ -58,6 +59,7 @@ class Crypto:
         self.session_key = hash_object.digest()
 
     def set_session_key(self, key):
+        print(key)
         self.session_key = key
 
     def gen_session_key(self):
