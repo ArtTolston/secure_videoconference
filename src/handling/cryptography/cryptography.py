@@ -28,9 +28,11 @@ class Crypto:
     def aes_encrypt(self, data):
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
+        print(self.session_key)
         encrypted_bytes = aes.encrypt(pad(data, AES.block_size))
         encrypted_bytes = b64encode(encrypted_bytes).decode()
         iv = aes.iv
+        print(iv)
         iv = b64encode(iv).decode()
         data_to_send = json.dumps({"iv": iv, "encrypted_bytes": encrypted_bytes}).encode()
         return data_to_send
@@ -38,9 +40,11 @@ class Crypto:
     def aes_decrypt(self, data):
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
+        print(self.session_key)
         data = json.loads(data.decode())
         iv = data["iv"]
         aes.iv = b64decode(iv.encode())
+        print(aes.iv)
         encrypted_bytes = data["encrypted_bytes"]
         encrypted_bytes = b64decode(encrypted_bytes.encode())
         data_to_show = unpad(aes.decrypt(encrypted_bytes), AES.block_size)

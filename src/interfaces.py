@@ -136,7 +136,6 @@ class Ui_MainWindow(object):
         bframe = pickle.dumps(frame)
         print(f'bframe md5 after pickling: {base64.b64encode(hashlib.md5(bframe).digest()).decode()}')
         if self.cipher == "Public key exchange":
-            print(self.handler.get_crypto().session_key)
             bframe = self.handler.get_crypto().aes_encrypt(bframe)
         else:
             pass
