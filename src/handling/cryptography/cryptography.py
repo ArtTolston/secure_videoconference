@@ -38,7 +38,7 @@ class Crypto:
     def aes_decrypt(self, data):
         # data should be in bytes
         aes = AES.new(self.session_key, AES.MODE_CBC)
-        data = data.decode()
+        data = json.loads(data.decode())
         iv = data["iv"]
         aes.iv = b64decode(iv.encode())
         encrypted_bytes = data["encrypted_bytes"]
