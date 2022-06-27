@@ -15,6 +15,7 @@ class UDP_Peer(QThread):
         self.udp_port = udp_port
         self.buffer_size = buffer_size
         self.choosed_address = "192.168.1.9"
+        self.is_video_started = True
 
         self.udp_listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.udp_listen_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -30,6 +31,12 @@ class UDP_Peer(QThread):
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as udp_sock:
             udp_sock.sendto(b'START', (self.choosed_address, self.udp_port))
 
+    def udp_stop(self):
+        # data should be in bytes b''
+        print("inside udp_stop")
+        with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as udp_sock:
+            udp_sock.sendto(b'STOP', (self.choosed_address, self.udp_port))
+
 
     def run(self):
         i = 0
@@ -43,6 +50,9 @@ class UDP_Peer(QThread):
             if recv_data == b'START':
                 self.choosed_address = addr[0]
                 print(f"sent by address: {addr[0]} from port: {addr[1]}")
+            elif recv_data == b'STOP':
+                self.is_video_started = False
+                self.udp_send_queue = Queue()
             else:
                 image += recv_data
                 print(f"recv_data size: {len(recv_data)}")
@@ -54,6 +64,10 @@ class UDP_Peer(QThread):
 
             if i == 0:
                 data = self.udp_send_queue.get()
+                if data == b'STOP':
+                    self.udp_send_queue = Queue()
+                    print("goodbye")
+                    return
                 zdata = zlib.compress(data)
                 print(f"zdata size: {len(zdata)}")
 

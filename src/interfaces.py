@@ -23,6 +23,7 @@ from src.p2p.udp_peer import UDP_Peer
 from src.handling.handler import  Handler
 import json
 import base64
+from queue import Queue
 
 
 
@@ -41,6 +42,9 @@ class Ui_MainWindow(object):
         self.connectButton = QtWidgets.QPushButton(self.centralwidget)
         self.connectButton.setGeometry(QtCore.QRect(460, 230, 91, 21))
         self.connectButton.setObjectName("connectButton")
+        self.closeButton = QtWidgets.QPushButton(self.centralwidget)
+        self.closeButton.setGeometry(QtCore.QRect(350, 260, 101, 21))
+        self.closeButton.setObjectName("closeButton")
         self.cipherBox = QtWidgets.QComboBox(self.centralwidget)
         self.cipherBox.setGeometry(QtCore.QRect(460, 260, 91, 21))
         self.cipherBox.setObjectName("cipherBox")
@@ -79,6 +83,7 @@ class Ui_MainWindow(object):
         self.updateButton.clicked.connect(self.update)
         self.clientsListWidget.itemClicked.connect(self.save_address)
         self.connectButton.clicked.connect(self.connect)
+        self.closeButton.clicked.connect(self.close_connection)
 
         # Create a QThread object
         self.peer = Peer(handler=self.handler)
@@ -145,7 +150,8 @@ class Ui_MainWindow(object):
     def check_is_video_started(self):
         if self.peer.is_video_started:
             self.is_video_started = True
-            self.cipher = "Public key exchange"
+        if self.udp_peer.is_video_started is False:
+            self.is_video_started = False
 
     def update(self):
         active_clients_addresses = self.peer.find()
@@ -168,9 +174,7 @@ class Ui_MainWindow(object):
             request["pub_key"] = pub_key
         else:
             pass
-        self.cipher = cipher
-        print(request)
-        print(self.choosed_address)
+
         try:
             self.handler = self.peer.tcp_connect(self.choosed_address, json.dumps(request).encode(), self.handler)
         except OSError:
@@ -181,6 +185,12 @@ class Ui_MainWindow(object):
         self.is_video_started = True
         self.udp_peer.udp_start()
 
+    def close_connection(self):
+        self.is_video_started = False
+        self.udp_peer.udp_send_queue = Queue().put(b'STOP')
+        self.udp_peer.udp_stop()
+
+
     def save_address(self, address):
         self.choosed_address = address.text()
         self.udp_peer.choosed_address = self.choosed_address
@@ -190,5 +200,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.updateButton.setText(_translate("MainWindow", "Update"))
         self.connectButton.setText(_translate("MainWindow", "Connect"))
+        self.closeButton.setText(_translate("MainWindow", "Close"))
         self.cipherBox.setItemText(0, _translate("MainWindow", "Public key exchange"))
         self.cipherBox.setItemText(1, _translate("MainWindow", "Diffie-Hellman"))
