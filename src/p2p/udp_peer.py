@@ -50,11 +50,16 @@ class UDP_Peer(QThread):
                 print("no recv_data")
                 break
             if recv_data == b'START':
+                self.is_video_started = True
                 self.choosed_address = addr[0]
                 print(f"sent by address: {addr[0]} from port: {addr[1]}")
             elif recv_data == b'STOP':
                 self.is_video_started = False
                 self.udp_send_queue = Queue()
+                self.udp_stop()
+                image = b''
+                i = 0
+                continue
             else:
                 image += recv_data
                 print(f"recv_data size: {len(recv_data)}")
@@ -66,10 +71,6 @@ class UDP_Peer(QThread):
 
             if i == 0:
                 data = self.udp_send_queue.get()
-                if data == b'STOP':
-                    self.udp_send_queue = Queue()
-                    print("goodbye")
-                    return
                 zdata = zlib.compress(data)
                 print(f"zdata size: {len(zdata)}")
 

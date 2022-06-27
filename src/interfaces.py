@@ -152,6 +152,8 @@ class Ui_MainWindow(object):
             self.is_video_started = True
         if self.udp_peer.is_video_started is False:
             self.is_video_started = False
+        else:
+            self.is_video_started = True
 
     def update(self):
         active_clients_addresses = self.peer.find()
@@ -187,7 +189,6 @@ class Ui_MainWindow(object):
 
     def close_connection(self):
         self.is_video_started = False
-        self.udp_peer.udp_send_queue = Queue().put(b'STOP')
         self.udp_peer.udp_stop()
 
 
