@@ -105,7 +105,7 @@ class Ui_MainWindow(object):
         self.timer.start(int(1000 / self.fps))
 
     def display_video_stream(self):
-        if not self.is_video_started:
+        if self.is_video_started is False:
             return
         if self.udp_peer.udp_receive_queue.empty():
             return

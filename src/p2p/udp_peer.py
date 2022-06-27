@@ -43,7 +43,9 @@ class UDP_Peer(QThread):
         image = b''
         print(f"start udp server listen on\n [address: {self.address}, port: {self.udp_port}]")
         while True:
+            print("before")
             recv_data, addr = self.udp_listen_socket.recvfrom(self.buffer_size)
+            print("here we go again")
             if not recv_data:
                 print("no recv_data")
                 break
